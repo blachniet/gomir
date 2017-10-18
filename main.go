@@ -208,6 +208,6 @@ func getLog(gitDir, prefix string) (io.WriteCloser, *log.Logger, error) {
 	}
 
 	// TODO: What flags should I set for the logger?
-	logger := log.New(logFile, prefix, log.Lshortfile)
+	logger := log.New(logFile, prefix, log.Ldate|log.Ltime|log.Lshortfile|log.LUTC)
 	return logFile, logger, nil
 }
