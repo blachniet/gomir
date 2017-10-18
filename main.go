@@ -12,7 +12,6 @@ Usage:
 	gomir push                                      # Push updates to mirror destination
 
 TODO:
-	- Add support for concurrency during fetch/push
 	- Add support for controlling concurrency during fetch/push
 	- Add documentation describing where repos are stored
 	- Add documentation describing what to do if something goes wrong during a fetch/push
@@ -29,6 +28,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
@@ -97,13 +98,13 @@ func add(fetchURL, pushURL, localDest string) {
 }
 
 func fetch() {
-	for _, gitDir := range findGitDirs() {
-		if fetchSingle(gitDir) {
-			color.Green("[✔] %v", gitDir)
-		} else {
-			color.Red("[X] %v", gitDir)
-		}
+	errCount := performOperationAsync(fetchSingle)
+	if errCount > 0 {
+		color.Red("Fetch failed for %v repos", errCount)
+		os.Exit(1)
 	}
+
+	os.Exit(0)
 }
 
 func fetchSingle(gitDir string) bool {
@@ -121,13 +122,13 @@ func fetchSingle(gitDir string) bool {
 }
 
 func push() {
-	for _, gitDir := range findGitDirs() {
-		if pushSingle(gitDir) {
-			color.Green("[✔] %v", gitDir)
-		} else {
-			color.Red("[X] %v", gitDir)
-		}
+	errCount := performOperationAsync(pushSingle)
+	if errCount > 0 {
+		color.Red("Push failed for %v repos", errCount)
+		os.Exit(1)
 	}
+
+	os.Exit(0)
 }
 
 func pushSingle(gitDir string) bool {
@@ -207,7 +208,29 @@ func getLog(gitDir, prefix string) (io.WriteCloser, *log.Logger, error) {
 		return nil, nil, errors.Wrap(err, "Error opening log file")
 	}
 
-	// TODO: What flags should I set for the logger?
 	logger := log.New(logFile, prefix, log.Ldate|log.Ltime|log.Lshortfile|log.LUTC)
 	return logFile, logger, nil
+}
+
+type gitDirOperation func(gitDir string) bool
+
+func performOperationAsync(op gitDirOperation) int64 {
+	var wg sync.WaitGroup
+	var errCount int64
+	for _, gitDir := range findGitDirs() {
+		wg.Add(1)
+		go func(gitDir string) {
+			defer wg.Done()
+
+			if op(gitDir) {
+				color.Green("[✔] %v", gitDir)
+			} else {
+				atomic.AddInt64(&errCount, 1)
+				color.Red("[X] %v", gitDir)
+			}
+		}(gitDir)
+	}
+
+	wg.Wait()
+	return errCount
 }
