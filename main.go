@@ -81,6 +81,8 @@ func add(fetchURL, pushURL, localDest string) {
 		localDest = fmt.Sprintf("%v%v", u.Host, u.Path)
 	}
 
+	localDest = ensureGitExt(localDest)
+
 	// Clone
 	if err := gitCloneMirror(fetchURL, localDest); err != nil {
 		fmt.Println("Error cloning repository")
@@ -181,6 +183,7 @@ func findGitDirs() []string {
 	filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if err == nil &&
 			info.IsDir() &&
+			strings.ToLower(filepath.Base(path)) != ".git" &&
 			strings.ToLower(filepath.Ext(path)) == ".git" {
 			gitDirs = append(gitDirs, path)
 			return filepath.SkipDir
@@ -188,6 +191,13 @@ func findGitDirs() []string {
 		return nil
 	})
 	return gitDirs
+}
+
+func ensureGitExt(str string) string {
+	if strings.ToLower(filepath.Ext(str)) != ".git" {
+		return fmt.Sprintf("%v.git", str)
+	}
+	return str
 }
 
 func getLog(gitDir, prefix string) (io.WriteCloser, *log.Logger, error) {
