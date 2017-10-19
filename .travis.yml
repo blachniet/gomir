@@ -5,11 +5,11 @@ go:
 script:
 - go build -race ./...
 - go test -v -race ./...
-- env GOOS=windows GOARCH=amd64 go build ./... && zip gomir_${TRAVIS_BRANCH}_windows_amd64.zip
+- env GOOS=windows GOARCH=amd64 go build -ldflags "-X main.version=${TRAVIS_BRANCH} -X main.gitCommit=${TRAVIS_COMMIT} -X main.buildDate=`date -u`" ./... && zip gomir_${TRAVIS_BRANCH}_windows_amd64.zip
   gomir.exe
-- env GOOS=linux GOARCH=amd64 go build ./... && zip gomir_${TRAVIS_BRANCH}_linux_amd64.zip
+- env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.version=${TRAVIS_BRANCH} -X main.gitCommit=${TRAVIS_COMMIT} -X main.buildDate=`date -u`" ./... && zip gomir_${TRAVIS_BRANCH}_linux_amd64.zip
   gomir
-- env GOOS=darwin GOARCH=amd64 go build ./... && zip gomir_${TRAVIS_BRANCH}_darwin_amd64.zip
+- env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.version=${TRAVIS_BRANCH} -X main.gitCommit=${TRAVIS_COMMIT} -X main.buildDate=`date -u`" ./... && zip gomir_${TRAVIS_BRANCH}_darwin_amd64.zip
   gomir
 deploy:
   provider: releases

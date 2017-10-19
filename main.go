@@ -35,6 +35,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Set via ldflags
+var version string
+var gitCommit string
+var buildDate string
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Not enough arguments")
@@ -43,6 +48,10 @@ func main() {
 
 	action := strings.ToLower(os.Args[1])
 	switch action {
+	case "version":
+		fmt.Printf("  Version:    %v\n", version)
+		fmt.Printf("  Git commit: %v\n", gitCommit)
+		fmt.Printf("  Built:      %v\n", buildDate)
 	case "add":
 		var fetchURL string
 		var pushURL string
