@@ -24,3 +24,5 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
+  draft: true
+  prerelease: true
