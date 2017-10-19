@@ -10,6 +10,7 @@ Usage:
 	gomir add <fetchURL> <pushURL> [<localDest>]    # Add a repo to mirror
 	gomir fetch                                     # Fetch latest updates from source repo
 	gomir push                                      # Push updates to mirror destination
+	gomir version									# Print the version
 
 TODO:
 	- Add support for controlling concurrency during fetch/push
