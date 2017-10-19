@@ -17,9 +17,9 @@ deploy:
   api_key:
     secure: 2+GHRElskIpJoR5c3/y5b5Rn0BaQvlBthJ5x00mTkxp+1cj8P378zejf/IKgpAJOn2pZV+JkPy9XKClN5iKmS3PspWDy++Aljs+ZTOnV379ddDoHPAAyAmB44bfqOH6pNUttdzMNX2GsJGFY9Cz4tyAv5mHwfvJf1wMxqOrlkv/jgafp2iyYAAGhkxl3JDHPWh/HzoLjVIj0lrru4pWNXd9pb6udCUaXG9mMCXAtzXlt2s1B0S7YwOvfIjM+vplQfo85uycl/MqQfGc6jOGixrR5+/AsSa4DZtkWGh8nDcUAF6Sn6q49dzJKpLcEYImQ2njvsXL8dmS3vwfyEad1cp44Qv52K2J+sHpSnrXRHQ5PfFVvm0uWnnk561ZxCSBJcx5pW6q9n9g7YoOKZFzwmdAptWMPvUA3wgUF+6Ex0IaM66c07jrtVNKgHmnp3NAFc2ptYwUFnu3X+FVgy20yhn+VzLo5aP3hfZrHABF+pCYGhIOdLAzVhiIHSZQLHVbp5hVWx40+3LRcWX0UrgTEKW0LTEg3u87o4wqN8ns/MSn4mOtK/QXpucsg/U2AnNnn+enKgVEXf9C62T06AOaKADCqLB97+ZIaiuGGFiZftT5KNxZm5G32idgyfLDzsYUnW6pdV0pBpv7gxOB/rk1waiY4Xm0W9IxUWz0DhYqzmu0=
   file:
-    - gomir_${TRAVIS_BRANCH:1}_windows_amd64.zip
-    - gomir_${TRAVIS_BRANCH:1}_linux_amd64.zip
-    - gomir_${TRAVIS_BRANCH:1}_darwin_amd64.zip
+    - gomir_${TRAVIS_BRANCH}_windows_amd64.zip
+    - gomir_${TRAVIS_BRANCH}_linux_amd64.zip
+    - gomir_${TRAVIS_BRANCH}_darwin_amd64.zip
   skip_cleanup: true
   on:
     tags: true
