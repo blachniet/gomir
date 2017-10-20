@@ -5,13 +5,6 @@
 /*
 Gomir mirrors git repositories
 
-Usage:
-
-	gomir add <fetchURL> <pushURL> [<localDest>]    # Add a repo to mirror
-	gomir fetch                                     # Fetch latest updates from source repo
-	gomir push                                      # Push updates to mirror destination
-	gomir version									# Print the version
-
 TODO:
 	- Add support for controlling concurrency during fetch/push
 	- Add documentation describing where repos are stored
@@ -34,6 +27,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 // Set via ldflags
@@ -42,43 +36,59 @@ var gitCommit string
 var buildDate string
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Not enough arguments")
-		os.Exit(1)
+	rootCmd := &cobra.Command{
+		Use:  "gomir",
+		Long: `Mirror Git repositories between two disconnected networks`,
 	}
 
-	action := strings.ToLower(os.Args[1])
-	switch action {
-	case "version":
-		fmt.Printf("  Version:    %v\n", version)
-		fmt.Printf("  Git commit: %v\n", gitCommit)
-		fmt.Printf("  Built:      %v\n", buildDate)
-	case "add":
-		var fetchURL string
-		var pushURL string
-		var localDest string
-		switch len(os.Args) {
-		case 4:
-			fetchURL = os.Args[2]
-			pushURL = os.Args[3]
-		case 5:
-			fetchURL = os.Args[2]
-			pushURL = os.Args[3]
-			localDest = os.Args[4]
-		default:
-			fmt.Println("Wrong number of arguments")
-			os.Exit(1)
-		}
-
-		add(fetchURL, pushURL, localDest)
-	case "fetch":
-		fetch()
-	case "push":
-		push()
-	default:
-		fmt.Printf("Unrecognized action '%v'\n", action)
-		os.Exit(1)
+	addCmd := &cobra.Command{
+		Use:   "add <fetchURL> <pushURL> [<localDest>]",
+		Short: "Add a repository to mirror",
+		Args:  cobra.RangeArgs(2, 3),
+		Run: func(cmd *cobra.Command, args []string) {
+			switch len(args) {
+			case 2:
+				add(args[0], args[1], "")
+			case 3:
+				add(args[0], args[1], args[2])
+			default:
+				fmt.Println("Wrong number of arguments")
+				os.Exit(1)
+			}
+		},
 	}
+
+	fetchCmd := &cobra.Command{
+		Use:   "fetch",
+		Short: "Fetch changes for all mirroed repositories",
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			fetch()
+		},
+	}
+
+	pushCmd := &cobra.Command{
+		Use:   "push",
+		Short: "Push changes for all mirrored repositories",
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			push()
+		},
+	}
+
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Show gomir version information",
+		Args:  cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("  Version:    %v\n", version)
+			fmt.Printf("  Git commit: %v\n", gitCommit)
+			fmt.Printf("  Built:      %v\n", buildDate)
+		},
+	}
+
+	rootCmd.AddCommand(addCmd, fetchCmd, pushCmd, versionCmd)
+	rootCmd.Execute()
 }
 
 func add(fetchURL, pushURL, localDest string) {
@@ -113,8 +123,6 @@ func fetch() {
 		color.Red("Fetch failed for %v repos", errCount)
 		os.Exit(1)
 	}
-
-	os.Exit(0)
 }
 
 func fetchSingle(gitDir string) bool {
@@ -137,8 +145,6 @@ func push() {
 		color.Red("Push failed for %v repos", errCount)
 		os.Exit(1)
 	}
-
-	os.Exit(0)
 }
 
 func pushSingle(gitDir string) bool {
