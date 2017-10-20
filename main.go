@@ -5,12 +5,35 @@
 /*
 Gomir mirrors git repositories
 
+Gomir is built to mirror Git repositories between two disconnected networks. The
+'source' network is the network that hosts the repositories that you want to mirror.
+The 'destination' network is the network that you want to host your mirrored version
+of the repositories.
+
+Generally, you will make use of the 'add' and 'fetch' commands on the source network.
+When connected to the destination network, you will make use of the 'push' command.
+
+Below is an example of a normal workflow. We're mirroring two repositories from GitHub
+to an SMB file share. The server name is 'gitserver' and the share is named 'repos'.
+
+	# Connect to the source network
+	gomir add https://github.com/blachniet/dotfiles.git file:////gitserver/repos/dotfiles.git
+	gomir add https://github.com/spf13/cobra.git file:////gitserver/repos/cobra.git
+	# Connect to the destination network
+	gomir push
+
+	# Time passes...
+
+	# Connect to the source network
+	gomir fetch
+	# Connect to the destination network
+	gomir push
+
 TODO:
 	- Add support for controlling concurrency during fetch/push
 	- Add documentation describing where repos are stored
 	- Add documentation describing what to do if something goes wrong during a fetch/push
 	- Add documentation for a normal synchronization workflow
-	- Add usage (gomir -h)
 */
 package main
 
