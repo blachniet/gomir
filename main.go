@@ -10,30 +10,63 @@ Gomir is built to mirror Git repositories between two disconnected networks. The
 The 'destination' network is the network that you want to host your mirrored version
 of the repositories.
 
-Generally, you will make use of the 'add' and 'fetch' commands on the source network.
-When connected to the destination network, you will make use of the 'push' command.
+Gomir stores local copies of the repositories in order to transport them between
+networks. It stores the copies of the repositories in the current working directory,
+so be cognizant of this when running commands.
 
-Below is an example of a normal workflow. We're mirroring two repositories from GitHub
-to an SMB file share. The server name is 'gitserver' and the share is named 'repos'.
+Add Repositories
 
-	# Connect to the source network
-	gomir add https://github.com/blachniet/dotfiles.git file:////gitserver/repos/dotfiles.git
-	gomir add https://github.com/spf13/cobra.git file:////gitserver/repos/cobra.git
-	# Connect to the destination network
-	gomir push
+To get started, you must add repsistories to mirror. You do that with the add command:
 
-	# Time passes...
+	gomir add <fetchURL> <pushURL> [<localDest>] [flags]
 
-	# Connect to the source network
-	gomir fetch
-	# Connect to the destination network
-	gomir push
+This command will fetch the repository from fetchURL and set origin's remote push URL
+to pushURL. Gomir will generate a sensible localDest, but you may provide your own.
+The localDest specifies where the local copy of the repository is stored.
 
-TODO:
-	- Add support for controlling concurrency during fetch/push
-	- Add documentation describing where repos are stored
-	- Add documentation describing what to do if something goes wrong during a fetch/push
-	- Add documentation for a normal synchronization workflow
+	$ cd ~/mirrored-repos
+	$ gomir add https://github.com/blachniet/dotfiles.git file:////server/repos/dotfiles
+	$ gomir add https://github.com/pkg/errors.git file:////server/repos/errors
+
+In the example above, we add two repositories to mirror. Gomir will save the local
+copies of these repositories in "~/mirrored-repos/github.com/blachniet/dotfiles.git/"
+and "~/mirrored-repos/github.com/pkg/errors.git/". We've also set where we're going
+to push these repositories on our destination network. In this example, we're pushing
+the repositories to an SMB file share on a system named 'server' and share named 'repos'.
+
+Push Repositories
+
+Now that we've added some repositories to mirror, we can push them to the destination
+network. Make sure you've connected to your destination network, then run the push command.
+
+	$ cd ~/mirrored-repos
+	$ gomir push
+	[✔] github.com/blachniet/dotfiles.git
+	[✔] github.com/pkg/errors.git
+
+Incorporate Updates
+
+Occasionally you will want fetch updates from the repository that your are mirroring.
+
+	$ cd ~/mirrored-repos
+
+	# Connect to the source network to fetch updates
+	$ gomir fetch
+	[✔] github.com/blachniet/dotfiles.git
+	[✔] github.com/pkg/errors.git
+
+	# Connect to the destination network to push the updates
+	$ gomir push
+	[✔] github.com/blachniet/dotfiles.git
+	[✔] github.com/pkg/errors.git
+
+Notes
+
+Gomir stores added repositories under the current working directory by default.
+
+The fetch/push recursively scan the current working directory for folders
+ending in ".git". It attempts a "git fetch" or "git push" in these.
+These operations are executed asynchronously per repository. asyncfol
 */
 package main
 
@@ -52,6 +85,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
+
+// TODO: Add support for controlling concurrency during fetch/push
+// TODO: Add documentation describing where repos are stored
+// TODO: Add documentation describing what to do if something goes wrong during a fetch/push
 
 // Set via ldflags
 var version string
