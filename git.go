@@ -16,6 +16,12 @@ import (
 
 // git clone --mirror <fetchURL> <localDest>
 func gitCloneMirror(fetchURL, localDest string) error {
+	if fetchURL == "" {
+		return errors.New("fetchURL is empty")
+	}
+	if localDest == "" {
+		return errors.New("localDest is empty")
+	}
 	cmd := exec.Command("git", "clone", "--mirror", fetchURL, localDest)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
